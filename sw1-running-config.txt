@@ -1,0 +1,55 @@
+! Configuración Inicial y Hardening - SW1 (Cisco Catalyst 2960)
+! Laboratorio de preparación CCNA - JMTech Lab
+
+enable
+configure terminal
+
+hostname SW1
+no ip domain-lookup
+service password-encryption
+enable secret CiscoEn@ble123
+
+banner motd # Acceso Restringido Solo Personal Autorizado #
+
+! Configuración de Consola
+line console 0
+ password CiscoCon123
+ logging synchronous
+ login
+ exit
+
+! Segmentación de VLAN de Administración
+vlan 5
+ name Administracion
+ exit
+
+interface vlan 1
+ no ip address
+ shutdown
+ exit
+
+interface vlan 5
+ ip address 172.16.50.1 255.255.255.0
+ no shutdown
+ exit
+
+! Asignación de Puerto de Acceso
+interface FastEthernet0/1
+ switchport mode access
+ switchport access vlan 5
+ exit
+
+! Configuración de Acceso Remoto Seguro (SSHv2)
+ip domain-name ://lab.com
+username admin secret CiscoAdmin123
+crypto key generate rsa
+! (Seleccionar 2048 bits en el prompt interactivo)
+ip ssh version 2
+
+line vty 0 15
+ login local
+ transport input ssh
+ exit
+
+end
+copy running-config startup-config
